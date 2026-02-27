@@ -1,0 +1,70 @@
+﻿<mah:MetroWindow x:Class="Konditerka.NewDecor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Konditerka"
+        mc:Ignorable="d"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        Title="NewDecor" Height="250" Width="800"
+        TitleCharacterCasing="Normal" 
+        TitleForeground="Azure" WindowStartupLocation="CenterScreen">
+    <mah:MetroWindow.Resources>
+        <!-- Стиль текста заголовка окна / работает только размер шрифта-->
+        <FontWeight x:Key="MahApps.Font.Weight.Window.Title">Bold</FontWeight>
+        <FontFamily x:Key="MahApps.Fonts.Window.Title">Comic Sans MS</FontFamily>
+        <System:Double x:Key="MahApps.Font.Size.Window.Title">18</System:Double>
+    </mah:MetroWindow.Resources>
+    
+    <Grid Background ="Azure">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Label Visibility="Collapsed" Name="DecorLabel" Content="Вид декора" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Visibility="Collapsed" Name="UpakLabel" Content="Вид упаковки" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <StackPanel Orientation="Vertical" Name="Zakup" Visibility="Collapsed">
+            <Label Visibility="Collapsed" Name="ZakupLabel" Content="Ингредиент" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <ComboBox x:Name="EdIzm" Visibility="Collapsed" Margin="5" FontSize="14" mah:TextBoxHelper.Watermark="Выберите единицы измерения" FontWeight="Bold">
+                <ComboBoxItem Content="гр"/>
+                <ComboBoxItem Content="шт"/>
+                <ComboBoxItem Content="мл"/>
+            </ComboBox>
+        </StackPanel>
+
+        <Label Visibility="Collapsed" Name="D_U1" Grid.Column="1" Content="Стоимость" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Visibility="Collapsed" Name="D_U2" Grid.Column="2" Content="На какое количество тортов" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Visibility="Collapsed" Name="Z1" Grid.Column="1" Content="Стоимость" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Label Visibility="Collapsed" Name="Z2" Grid.Column="2" Content="Количество" FontFamily="Comic Sans MS" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <Button Visibility="Collapsed" Grid.Column="2" Grid.Row="2" Name="SaveDecor" Content="Добавить" Background="Chocolate" Click="SaveDecor_Click" Margin="5,25,5,5"/>
+        <Button Visibility="Collapsed" Grid.Column="2" Grid.Row="2" Name="SaveUpak" Content="Добавить" Background="Chocolate" Click="SaveUpak_Click" Margin="5,25,5,5"/>
+        <Button Visibility="Collapsed" Grid.Column="2" Grid.Row="2" Name="SaveZakup" Content="Сохранить" Background="Chocolate" Click="SaveZak_Click" Margin="5,25,5,5"/>
+        
+        <TextBox Grid.Row="1" x:Name="TextBoxName" Margin="5" TextChanged="TextBoxName_TextChanged" FontSize="16" KeyDown="TextBoxName_KeyDown" />
+        <ListBox Grid.Row="2" x:Name="List" Margin="5"  SelectionChanged="List_SelectionChanged" FontSize="14" Cursor="Hand" Background="Azure"/>
+        <DataGrid x:Name="DG" AutoGenerateColumns="True" Grid.Row="2" Grid.Column="1" Margin="5,5,10,5" Visibility="Collapsed"/>
+        <TextBox Grid.Row="1" Grid.Column="1" x:Name="Price" Margin="5" FontSize="16"/>
+        <TextBox Grid.Row="1" Grid.Column="2" x:Name="Count" Margin="5" FontSize="16"/>
+
+        <Grid Grid.Row="2" Grid.Column="1" Margin="5" x:Name="DateGrid" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Дата покупки" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <DatePicker Grid.Row="1" Name="datePicker1" IsDropDownOpen="False" SelectedDateFormat="Short" IsTodayHighlighted="True"  Margin="10,10,10,45"/>
+        </Grid>
+
+    </Grid>
+</mah:MetroWindow>

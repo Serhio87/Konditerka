@@ -1,0 +1,498 @@
+﻿<mah:MetroWindow
+        x:Class="Konditerka.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Konditerka"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        mc:Ignorable="d"
+        Title="КОНДИТЕРКА" Height="600" Width="1100" Closing="Window_Closing" 
+        Icon="/icons8-десерт-94.png" WindowStartupLocation="CenterScreen">
+    <mah:MetroWindow.Resources>
+        <!-- Определяем DataTemplate с TextBlock внутри, который гарантированно переносит текст -->
+        <DataTemplate x:Key="WrappedHeaderTemplate">
+            <TextBlock Text="{Binding}" 
+                   TextWrapping="Wrap" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Top"/>
+        </DataTemplate>
+        <!-- Применяем этот шаблон ко всем заголовкам в DataGrid -->
+        <Style TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="ContentTemplate" Value="{StaticResource WrappedHeaderTemplate}"/>
+            <!-- Опционально можно задать минимальную высоту здесь -->
+            <Setter Property="MinHeight" Value="40"/>
+        </Style>
+
+        <!-- Изменение вида ВЫБРАННОЙ вкладки -->
+        <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource MahApps.Styles.TabItem}">
+
+            <Style.Triggers>
+
+                <!-- Если вкладка выбрана -->
+                <Trigger Property="IsSelected" Value="True">
+
+                    <!-- Цвет фона выбранной вкладки -->
+                    <Setter Property="Background" Value="#FFBFECC0"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="Black"/>
+                    <!-- Цвет текста выбранной вкладки -->
+                    <Setter Property="Foreground" Value="{DynamicResource MahApps.Brushes.Accent}"/>
+                    <Setter Property="FontSize" Value="14"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <local:DifferenceToBackgroundConverter x:Key="DiffConverter"/>
+    </mah:MetroWindow.Resources>
+
+    <Grid>
+        <TabControl x:Name="TabContr" Style="{DynamicResource MahApps.Styles.TabControl.Animated}" 
+                    Margin="3" Padding="2" SelectionChanged="TabContr_SelectionChanged">
+
+            <TabItem Header="Календарь">
+                <Grid Background="Aquamarine">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="0.15*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Viewbox Grid.Column="0" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10">
+
+                    <Calendar x:Name="MainCalendar" IsTodayHighlighted="True" 
+                            FirstDayOfWeek="Monday" 
+                            DisplayMode="Month" 
+                            HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Stretch" 
+                            Margin="10" 
+                            Foreground="#FF038A0B" 
+                            FontFamily="Comic Sans MS" 
+                            AutomationProperties.Name="MainCalendar"
+                            SelectedDatesChanged="MainCalendar_SelectedDatesChanged">
+                            <Calendar.Resources>
+                                <!-- Подключаем конвертер (убедитесь, что local указывает на пространство Konditerka) -->
+                                <local:DateToDescriptionConverter x:Key="DateToDescConv"/>
+                            </Calendar.Resources>
+                            <Calendar.BorderBrush>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFA3AEB9"/>
+                                    <GradientStop Color="#FF8399A9" Offset="0.375"/>
+                                    <GradientStop Color="#FF718597" Offset="0.375"/>
+                                    <GradientStop Color="#FF69869C" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Calendar.BorderBrush>
+                            <Calendar.CalendarDayButtonStyle>
+                                <Style TargetType="CalendarDayButton" BasedOn="{StaticResource {x:Type CalendarDayButton}}">
+                                    <!-- Задержка перед появлением (в миллисекундах). 0 - появится мгновенно -->
+                                    <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+                                    <!-- Время, в течение которого подсказка будет видна (мс) -->
+                                    <Setter Property="ToolTipService.ShowDuration" Value="10000"/>
+                                    <!-- Задержка между показом подсказок при быстром переходе от одной даты к другой (мс) -->
+                                    <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
+
+                                    <!-- 1. Привязываем ToolTip -->
+                                    <Setter Property="ToolTip" Value="{Binding Converter={StaticResource DateToDescConv}}"/>
+
+                                    <!-- 2. Свойства ПО УМОЛЧАНИЮ (для дат с заказами) -->
+                                    <Setter Property="Background" Value="#FFEAA035"/>
+                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="BorderBrush" Value="#FFFDFDFD"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+
+                                    <Style.Triggers>
+                                        <!-- 3. ТРИГГЕР ДЛЯ ПУСТЫХ ДАТ: Если конвертер вернул null — сбрасываем оформление -->
+                                        <DataTrigger Binding="{Binding Converter={StaticResource DateToDescConv}}" Value="{x:Null}">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="#FF038A0B"/>
+                                            <Setter Property="BorderBrush" Value="White"/>
+                                            <Setter Property="BorderThickness" Value="1"/>
+                                            <!-- Ваш основной зеленый цвет -->
+                                            <Setter Property="FontWeight" Value="Normal"/>
+                                            <Setter Property="BorderThickness" Value="0"/>
+                                        </DataTrigger>
+
+                                        <!-- Дополнительно: чтобы числа не были прозрачными при наведении/выделении -->
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#FF1C71C5"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+
+                                </Style>
+                            </Calendar.CalendarDayButtonStyle>
+                            <Calendar.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FF1C71C5"/>
+                                    <GradientStop Color="#FFFCFCFD" Offset="0.16"/>
+                                    <GradientStop Color="#FF1733D2" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Calendar.Background>
+
+                        </Calendar>
+                    </Viewbox>
+                    
+                    <Grid Name="GridListTime" Grid.Column="1">
+                        <ListBox Name="TimeListBox" Margin="45" Visibility="Collapsed" FontSize="16" Background="#FF25AF9F">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Border окрашивается в цвет из StatusColor -->
+                                    <Border Background="{Binding StatusColor}" CornerRadius="3" Padding="5" Margin="2">
+                                        <TextBlock Text="{Binding DisplayTime}" 
+                           IsEnabled="{Binding IsEnabled}"
+                           FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <!-- Расположение элементов в листбокс (плитка) -->
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="6" FirstColumn="2"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
+                    </Grid>
+                    
+                    <Button Grid.Row="2" Grid.ColumnSpan="2" Background="YellowGreen" Name="Оформить" Content="Оформить Заказ" 
+            Click="Оформить_Click"
+            Margin="10"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Клиенты">
+                <Grid Background="#FFE5E5E5">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid Grid.Column="0"
+                              IsReadOnly="True" 
+          x:Name="DataGridKlients" 
+          AutoGenerateColumns="True" 
+          Margin="10"
+          AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+          RowHeight="NaN"
+          ColumnWidth="*"
+          ScrollViewer.CanContentScroll="False"
+          ScrollViewer.IsDeferredScrollingEnabled="True" 
+                              ContextMenuOpening="DataGridKlients_ContextMenuOpening">
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Редактировать" Click="EditKl_Click" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                    </DataGrid>
+                    
+                    <!-- StackPanel теперь занимает 1-ю строку, которая подстроится под его высоту -->
+                    <StackPanel Grid.Column="1" x:Name="EditKli" Orientation="Vertical" Visibility="Collapsed" Opacity="0" Margin="0,10,0,0" >
+                        <StackPanel.RenderTransform>
+                            <TranslateTransform x:Name="EditPanelKli" X="40"/>
+                        </StackPanel.RenderTransform>
+
+                        <!-- Заголовок -->
+                        <TextBlock Text="Редактирование данных клиента:" Foreground="#555" FontWeight="Bold" Margin="0,5,0,5" FontSize="14"/>
+
+                        <!-- Поля ввода -->
+                        <TextBlock Text="Имя:" Margin="10,5,10,0" FontSize="14"/>
+                        <TextBox x:Name="Name" Width="200" HorizontalAlignment="Left" Margin="10,0" Padding="3" FontSize="14"/>
+
+                        <TextBlock Text="Фамилия:" Margin="10,5,10,0" FontSize="14"/>
+                        <TextBox x:Name="Fam" Width="200" HorizontalAlignment="Left" Margin="10,0" Padding="3" FontSize="14"/>
+
+                        <TextBlock Text="Номер телефона:" Margin="10,10,10,0" FontSize="14"/>
+                        <TextBox x:Name="Tel" Width="200" Margin="10,0" FontSize="14" HorizontalAlignment="Left" mah:TextBoxHelper.Watermark="+375 (__) ___-__-__" mah:TextBoxHelper.ClearTextButton="True">
+
+                        </TextBox>
+
+                        <TextBlock Text="Адрес:" Margin="10,10,10,0" FontSize="14"/>
+                        <TextBox x:Name="Adr" Width="200" HorizontalAlignment="Left" Margin="10,0" Padding="3" FontSize="14"/>
+
+                        <TextBlock Text="Заметки:" Margin="10,10,10,0" FontSize="14"/>
+                        <TextBox x:Name="Zamet" Width="200" Height="Auto" TextWrapping="Wrap" SpellCheck.IsEnabled="True" HorizontalAlignment="Left" Margin="10,0" Padding="3" FontSize="14"/>
+
+                        <!-- Кнопки в горизонтальном стеке внизу -->
+                        <StackPanel Orientation="Horizontal" Margin="10,20,0,0">
+                            <Button Content="OK" Click="SaveEditKli_Click" Background="#4CAF50" Foreground="White" Width="60" Height="30"/>
+                            <Button Content="✕" Margin="10,0,0,0" Click="CancelKli_Click" Background="#F44336" Foreground="White" Width="40" Height="30"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Заказы" Name="Zakazy">
+                <Grid Background="#FFE5E5E5">
+                    <Frame Name="SostZakFrame" NavigationUIVisibility="Hidden" 
+       Navigated="SostZakFrame_Navigated"
+       JournalOwnership="OwnsJournal"/>
+                    <!-- страница и ее имя для доступа -->
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid x:Name="DataGridZakazy" 
+                              AutoGenerateColumns="True" 
+                              IsReadOnly="True"
+                              Margin="10"
+                              AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                              RowHeight="NaN"
+                              ColumnWidth="*"
+                              ScrollViewer.CanContentScroll="False"
+                              ScrollViewer.IsDeferredScrollingEnabled="True" 
+                              MouseDoubleClick="DataGridZakazy_MouseDoubleClick"
+                              ContextMenuOpening="DataGridZakazy_ContextMenuOpening">
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Редактировать комментарий" Click="Edit_Click" />
+                                <MenuItem Header="Изменить статус" Name="izm_st">
+                                    <MenuItem Header="Новый"            Click="Status_Click" Name="New" Tag="{x:Static local:Metods+StatusZak.Новый}"/>
+                                    <MenuItem Header="В работе"         Click="Status_Click" Name="InW" Tag="{x:Static local:Metods+StatusZak.В_работе}"/>
+                                    <MenuItem Header="Готов к выдаче"   Click="Status_Click" Name="Got" Tag="{x:Static local:Metods+StatusZak.Готов_к_выдаче}"/>
+                                    <MenuItem Header="Выдан"            Click="Status_Click" Name="Go" Tag="{x:Static local:Metods+StatusZak.Выдан}"/>
+                                    <MenuItem Header="Отменен"          Click="Status_Click" Name="Can" Tag="{x:Static local:Metods+StatusZak.Отменен}"/>
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+
+                    <Popup Name="EditPopup" Placement="Mouse" StaysOpen="False">
+                        <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Новый комментарий:" />
+                                <TextBox Name="EditTextBox" Width="150" Margin="0,5" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Сохранить" Click="SaveKomment_Click" />
+                                    <Button Content="Отмена" IsCancel="True" Click="KommCancel_Click" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Header="Рецепты" Name="Recipes">
+                
+                <Grid Background="#FFE5E5E5">
+                    <Frame Name="SostRecipFrame" NavigationUIVisibility="Hidden" 
+                           Navigated="SostRecipFrame_Navigated"
+                           JournalOwnership="OwnsJournal"/>  <!-- страница и ее имя для доступа -->
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid x:Name="DataGridRecipes" 
+                              AutoGenerateColumns="True"
+                              IsReadOnly="True"
+                              Margin="10"
+                              AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                              RowHeight="NaN"
+                              ColumnWidth="*"
+                              ScrollViewer.CanContentScroll="False"
+                              ScrollViewer.IsDeferredScrollingEnabled="True" 
+                              MouseDoubleClick="DataGridRecipes_MouseDoubleClick" 
+                              ContextMenuOpening="DataGridRecipes_ContextMenuOpening" 
+                              mah:DataGridHelper.CellPadding="5,0,5,0">
+
+                        
+                        <DataGrid.ContextMenu>
+                            <ContextMenu Name="ContMenu">
+                                <MenuItem Name="Op" Header="Изменить описание" Click="EditOpis_Click" />
+                                <MenuItem Name="In" Header="Изменить Инструкцию" Click="EditInstr_Click"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                    </DataGrid>
+
+                    <Popup Name="EditRecipPopup" Placement="Mouse" StaysOpen="False">
+                        <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                            <StackPanel>
+                                <TextBlock Name="TextBlock"/>
+                                <TextBox Name="EditBox" Width="Auto" MaxWidth="900" Height="Auto" MaxHeight="400" Margin="0,5" TextWrapping="Wrap"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Сохранить" Click="SaveOI_Click" />
+                                    <Button Content="Отмена" IsCancel="True" Click="CancelOI_Click" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Ингридиенты">
+                <Grid Background="#FFE5E5E5">
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid x:Name="DataGridIngr" 
+                              AutoGenerateColumns="True"
+                              IsReadOnly="True"
+                              Margin="10"
+                              AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                              RowHeight="NaN"
+                              ColumnWidth="*"
+                              ScrollViewer.CanContentScroll="False"
+                              ScrollViewer.IsDeferredScrollingEnabled="True"
+                              ContextMenuOpening="DataGridRecipes_ContextMenuOpening">
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Изменить количество" Click="EditKolich_Click" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <Popup Name="EditKolichPopup" Placement="Mouse" StaysOpen="False">
+                            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Name="ChangeName" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Name="Change"/>
+                                    <TextBox Name="EditKolichBox" Width="150" Margin="0,5" KeyDown="EditKolichBox_KeyDown" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="Сохранить" Click="SaveKolich_Click" Margin="0,0,5,0"/>
+                                        <Button Content="Отмена" IsCancel="True" Click="KolichOtmena" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Декор">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid x:Name="DataGridDecor" 
+                  AutoGenerateColumns="True"
+                              IsReadOnly="True"
+                  Margin="10"
+                  AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                  RowHeight="NaN"
+                  ColumnWidth="*"
+                  ScrollViewer.CanContentScroll="False"
+                  ScrollViewer.IsDeferredScrollingEnabled="True"
+                              ContextMenuOpening="DataGridRecipes_ContextMenuOpening">
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Изменить количество" Click="EditKolichDec_Click" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <Popup Name="EditKolichPopupDec" Placement="Mouse" StaysOpen="False">
+                            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Name="ChangeNameDec" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Name="ChangeDec"/>
+                                    <TextBox Name="EditKolichBoxDec" Width="150" Margin="0,5" KeyDown="EditKolichBoxDec_KeyDown" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="Сохранить" Click="SaveKolichDec_Click" Margin="0,0,5,0"/>
+                                        <Button Content="Отмена" IsCancel="True" Click="KolichOtmenaDec" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+
+                    </DataGrid>
+
+                    <Button Grid.Column="1" Background="#FF6C9C0C" Name="NewDecor" Content="Добавить" 
+Click="NewDecor_Click"
+Margin="10"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Упаковка">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid x:Name="DataGridUpak" 
+                              AutoGenerateColumns="True" 
+                              IsReadOnly="True"
+                              Margin="10"
+                              AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                              RowHeight="NaN"
+                              ColumnWidth="*"
+                              ScrollViewer.CanContentScroll="False"
+                              ScrollViewer.IsDeferredScrollingEnabled="True"
+                              ContextMenuOpening="DataGridRecipes_ContextMenuOpening">
+
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Изменить количество" Click="EditKolichUpak_Click" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <Popup Name="EditKolichPopupUpak" Placement="Mouse" StaysOpen="False">
+                            <Border Background="White" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                                <StackPanel>
+                                    <TextBlock Name="ChangeNameUpak" FontWeight="Bold" FontSize="14"/>
+                                    <TextBlock Name="ChangeUpak"/>
+                                    <TextBox Name="EditKolichBoxUpak" Width="150" Margin="0,5" KeyDown="EditKolichBoxUpak_KeyDown" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="Сохранить" Click="SaveKolichUpak_Click" Margin="0,0,5,0"/>
+                                        <Button Content="Отмена" IsCancel="True" Click="KolichOtmenaUpak" Margin="5,0,0,0"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+
+                    </DataGrid>
+
+                    <Button Grid.Column="1" Background="#FF6C9C0C" Name="NewUpak" Content="Добавить" 
+Click="NewUpak_Click"
+Margin="10"/>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Закупка">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Добавляем DataGrid с именем для доступа из кода -->
+                    <DataGrid Grid.Column="0" x:Name="DataGridZakup" 
+                  AutoGenerateColumns="True" 
+                              IsReadOnly="True"
+                  Margin="10"
+                  AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                  RowHeight="NaN"
+                  ColumnWidth="*"
+                  ScrollViewer.CanContentScroll="False"
+                  ScrollViewer.IsDeferredScrollingEnabled="True"/>
+
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Button Background="#FF6C9C0C" Name="Postuplenie" Content="Закупка" Click="Postuplenie_Click" Margin="10"/>
+                        <Button Grid.Row="1" Background="#FF6C9C0C" Name="Dop" Content="Иные затраты" Click="Dop_Click" Margin="10"/>
+                    </Grid>
+
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- Кнопка размещена ниже TabControl в той же колонке -->
+        <!-- Используйте HorizontalAlignment="Right" и Margin, чтобы сдвинуть её вправо -->
+        <Button Content="Новый" FontSize="18" FontWeight="Bold" Background="#FFBFECC0"
+            HorizontalAlignment="Right" VerticalAlignment="Top"
+            Margin="0,7,7,0"    
+            Width="90" Height="35"
+            Click="NewRec_Click" Name="NewRec"
+                Foreground="#CC647687" BorderBrush="Black" BorderThickness="0"
+                Visibility="Collapsed">
+        </Button>
+
+    </Grid>
+</mah:MetroWindow>
